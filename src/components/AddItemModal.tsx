@@ -1,6 +1,6 @@
-import { Button, TextField } from "@mui/material";
+import { Button, styled, TextField } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
-import { styled } from "@mui/system";
+import { Word } from "./Home";
 
 const StyledBox = styled("div")`
   justify-content: center;
@@ -9,7 +9,7 @@ const StyledBox = styled("div")`
   left: 50%;
   transform: translate(-50%, -50%);
   padding: 16px;
-  border: 1px solid #1976d2;
+  border: ${({ theme }) => `1px solid ${theme.palette.primary.main}`};
   border-radius: 8px;
   background-color: ${({ theme }) => theme.palette.background.paper};
 `;
@@ -19,19 +19,17 @@ const StyledForm = styled("form")`
   flex-direction: column;
 `;
 
-type VocabItem = { newWord: string; knownWord: string };
+type AddItemModalProps = { addItem: (word: Word) => void };
 
-type AddItemModalProps = { close: () => void };
-
-export const AddItemModal = ({ close }: AddItemModalProps) => {
-  const form = useForm<VocabItem>({
+export const AddItemModal = ({ addItem }: AddItemModalProps) => {
+  const form = useForm<Word>({
     defaultValues: {
       newWord: "",
       knownWord: "",
     },
     onSubmit: ({ value }) => {
       console.log(value);
-      close();
+      addItem(value);
     },
   });
 
@@ -54,7 +52,9 @@ export const AddItemModal = ({ close }: AddItemModalProps) => {
                 name={field.name}
                 label="New Word"
                 value={field.state.value}
-                onChange={({ target }) => field.handleChange(target.value)}
+                onChange={({ target }) =>
+                  field.handleChange(target.value.toUpperCase())
+                }
               />
             )}
           />
@@ -70,7 +70,9 @@ export const AddItemModal = ({ close }: AddItemModalProps) => {
                 name={field.name}
                 label="Known Word"
                 value={field.state.value}
-                onChange={({ target }) => field.handleChange(target.value)}
+                onChange={({ target }) =>
+                  field.handleChange(target.value.toUpperCase())
+                }
               />
             )}
           />
