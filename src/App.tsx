@@ -28,7 +28,9 @@ const App = () => {
         sx={{ display: "flex", marginTop: 5, justifyContent: "center" }}
       >
         <Stack direction="column" gap={2}>
-          <Button variant="contained">Add Vocabulary</Button>
+          <Button variant="contained" color="success">
+            Add Vocabulary
+          </Button>
           <Button variant="contained">Test Vocabulary</Button>
         </Stack>
       </Container>
