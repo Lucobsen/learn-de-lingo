@@ -1,14 +1,6 @@
-import {
-  AppBar,
-  Box,
-  createTheme,
-  SvgIcon,
-  ThemeProvider,
-  Toolbar,
-  Typography,
-} from "@mui/material";
-import AutoStoriesIcon from "@mui/icons-material/AutoStories";
+import { createTheme, ThemeProvider } from "@mui/material";
 import { Home } from "./components/Home";
+import { TopBar } from "./components/TopBar";
 
 const App = () => {
   const theme = createTheme({
@@ -20,17 +12,7 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
-          <Toolbar>
-            <SvgIcon fontSize="large" component={AutoStoriesIcon} />
-            <Typography variant="h6" sx={{ flexGrow: 1 }} pl={2}>
-              Learn De Lingo
-            </Typography>
-          </Toolbar>
-        </AppBar>
-      </Box>
-
+      <TopBar />
       <Home />
     </ThemeProvider>
   );

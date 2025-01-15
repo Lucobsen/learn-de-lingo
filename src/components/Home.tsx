@@ -2,24 +2,41 @@ import {
   Button,
   Container,
   Modal,
+  Paper,
   Stack,
-  styled,
-  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from "@mui/material";
 import { useState } from "react";
 import { AddItemModal } from "./AddItemModal";
 import { useLocalStorage } from "usehooks-ts";
-
-const StyledBox = styled("div")`
-  justify-content: center;
-  min-width: 168px;
-  padding: 16px;
-  border: ${({ theme }) => `1px solid ${theme.palette.primary.main}`};
-  border-radius: 8px;
-  background-color: ${({ theme }) => theme.palette.background.paper};
-`;
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 
 export type Word = { newWord: string; knownWord: string };
+
+const columnHelper = createColumnHelper<Word>();
+
+const columns = [
+  columnHelper.accessor((row) => row.newWord, {
+    id: "newWord",
+    cell: (info) => info.getValue(),
+    header: () => <span>New Word</span>,
+  }),
+  columnHelper.accessor((row) => row.knownWord, {
+    id: "knownWord",
+    cell: (info) => <i>{info.getValue()}</i>,
+    header: () => <span>Known Word</span>,
+  }),
+];
 
 export const Home = () => {
   const [words, setWords] = useLocalStorage<Word[]>("words", []);
@@ -27,10 +44,21 @@ export const Home = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  const table = useReactTable({
+    data: words,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
   return (
     <>
       <Container
-        sx={{ display: "flex", marginTop: 5, justifyContent: "center" }}
+        sx={{
+          display: "flex",
+          marginTop: 5,
+          justifyContent: "center",
+          p: 0,
+        }}
       >
         <Stack direction="column" gap={2} alignItems="center">
           <Button
@@ -38,20 +66,54 @@ export const Home = () => {
             onClick={handleOpen}
             sx={{ minWidth: "200px" }}
           >
-            Add New Words
+            Add New Vocab
           </Button>
 
-          {words.length > 0 ? (
-            <StyledBox>
-              {words.map(({ knownWord, newWord }, index) => (
-                <Stack key={index}>
-                  <Typography>
-                    {newWord} = {knownWord}
-                  </Typography>
-                </Stack>
-              ))}
-            </StyledBox>
-          ) : null}
+          <TableContainer
+            component={Paper}
+            sx={{
+              p: 2,
+              borderRadius: 1,
+              border: ({ palette }) => `1px solid ${palette.primary.main}`,
+            }}
+          >
+            <Table sx={{ maxWidth: 300 }}>
+              <TableHead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableCell key={header.id} padding="none" sx={{ pb: 1 }}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHead>
+              <TableBody>
+                {table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        padding="none"
+                        sx={{ py: 1, border: "none" }}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Stack>
       </Container>
 
