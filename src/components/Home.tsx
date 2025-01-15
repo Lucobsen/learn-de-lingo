@@ -1,10 +1,8 @@
 import {
-  Button,
   Card,
   Collapse,
   Container,
   IconButton,
-  Modal,
   Paper,
   Stack,
   Table,
@@ -17,7 +15,6 @@ import {
 } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useState } from "react";
-import { AddItemModal } from "./AddItemModal";
 import { useLocalStorage } from "usehooks-ts";
 import {
   createColumnHelper,
@@ -45,11 +42,8 @@ const columns = [
 ];
 
 export const Home = () => {
-  const [words, setWords] = useLocalStorage<Word[]>("words", []);
-  const [open, setOpen] = useState(false);
+  const [words] = useLocalStorage<Word[]>("words", []);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
 
   const table = useReactTable({
     data: words,
@@ -58,103 +52,82 @@ export const Home = () => {
   });
 
   return (
-    <>
-      <Container
-        sx={{
-          display: "flex",
-          marginTop: 5,
-          justifyContent: "center",
-          p: 0,
-        }}
-      >
-        <Stack direction="column" gap={2} alignItems="center">
-          <Button
-            variant="contained"
-            onClick={handleOpen}
-            sx={{ minWidth: "200px" }}
-          >
-            Add New Vocab
-          </Button>
-
-          {words.length > 0 && (
-            <Card
-              sx={{
-                p: 1,
-                width: 300,
-                borderRadius: 1,
-                border: ({ palette }) => `1px solid ${palette.primary.main}`,
-              }}
-            >
-              <Stack direction="row" alignItems="center">
-                <IconButton
-                  onClick={() =>
-                    setIsCollapsed((previousValue) => !previousValue)
-                  }
-                >
-                  {isCollapsed ? <ExpandMoreIcon /> : <ChevronRightIcon />}
-                </IconButton>
-                <Typography>Vocab</Typography>
-              </Stack>
-
-              <Collapse in={isCollapsed}>
-                <TableContainer component={Paper}>
-                  <Table>
-                    <TableHead>
-                      {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id}>
-                          {headerGroup.headers.map((header) => (
-                            <TableCell
-                              key={header.id}
-                              padding="none"
-                              sx={{ pb: 1 }}
-                            >
-                              {header.isPlaceholder
-                                ? null
-                                : flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                  )}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))}
-                    </TableHead>
-                    <TableBody>
-                      {table.getRowModel().rows.map((row) => (
-                        <TableRow key={row.id}>
-                          {row.getVisibleCells().map((cell) => (
-                            <TableCell
-                              key={cell.id}
-                              padding="none"
-                              sx={{ py: 1, border: "none" }}
-                            >
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext()
-                              )}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Collapse>
-            </Card>
-          )}
-        </Stack>
-      </Container>
-
-      <Modal open={open} onClose={handleClose}>
-        <div>
-          <AddItemModal
-            addItem={(value) => {
-              setWords((previousValue) => [...previousValue, value]);
-              handleClose();
+    <Container
+      sx={{
+        display: "flex",
+        marginTop: 5,
+        justifyContent: "center",
+        p: 0,
+      }}
+    >
+      <Stack direction="column" gap={2} alignItems="center">
+        {words.length > 0 && (
+          <Card
+            sx={{
+              p: 1,
+              width: 300,
+              borderRadius: 1,
+              border: ({ palette }) => `1px solid ${palette.primary.main}`,
             }}
-          />
-        </div>
-      </Modal>
-    </>
+          >
+            <Stack direction="row" alignItems="center">
+              <IconButton
+                onClick={() =>
+                  setIsCollapsed((previousValue) => !previousValue)
+                }
+              >
+                {isCollapsed ? <ExpandMoreIcon /> : <ChevronRightIcon />}
+              </IconButton>
+              <Typography>Vocab</Typography>
+            </Stack>
+
+            <Collapse in={isCollapsed}>
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <TableRow key={headerGroup.id}>
+                        {headerGroup.headers.map((header) => (
+                          <TableCell
+                            key={header.id}
+                            padding="none"
+                            sx={{ pb: 1 }}
+                          >
+                            {header.isPlaceholder
+                              ? null
+                              : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableHead>
+                  <TableBody>
+                    {table.getRowModel().rows.map((row) => (
+                      <TableRow key={row.id}>
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell
+                            key={cell.id}
+                            padding="none"
+                            sx={{ py: 1, border: "none" }}
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Collapse>
+          </Card>
+        )}
+      </Stack>
+    </Container>
   );
 };
