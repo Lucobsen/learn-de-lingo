@@ -36,8 +36,11 @@ export const TopBar = () => {
                 height: 30,
                 minHeight: 30,
                 color: ({ palette }) => palette.primary.main,
-                backgroundColor: ({ palette }) => palette.background.default,
+                backgroundColor: ({ palette }) => palette.background.paper,
                 border: ({ palette }) => `1px solid ${palette.primary.main}`,
+                "&:hover": {
+                  backgroundColor: ({ palette }) => palette.background.paper,
+                },
               }}
               color="primary"
               onClick={handleOpen}
