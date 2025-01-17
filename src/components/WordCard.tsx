@@ -84,7 +84,7 @@ export const WordCard = ({
     <Card
       sx={{
         p: 1,
-        width: 300,
+        width: "90%",
         borderRadius: 1,
         border: ({ palette }) => `1px solid ${palette.primary.main}`,
       }}
