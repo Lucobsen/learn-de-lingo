@@ -3,11 +3,12 @@ import { useState } from "react";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 
-const getColor = (palette: Palette, passed: boolean | undefined) => {
+const getButtonStatusColor = (
+  palette: Palette,
+  passed: boolean | undefined
+) => {
   if (passed === true) return palette.success.main;
-
   if (passed === false) return palette.error.main;
-
   return palette.info.main;
 };
 
@@ -35,7 +36,7 @@ export const TestItem = ({
       <Button
         sx={{
           minWidth: 100,
-          color: ({ palette }) => getColor(palette, passed),
+          color: ({ palette }) => getButtonStatusColor(palette, passed),
         }}
         variant="outlined"
         onClick={() => {
@@ -45,6 +46,7 @@ export const TestItem = ({
       >
         {reveal ? knownWord : newWord}
       </Button>
+
       <Stack direction="row">
         <IconButton
           disabled={!reveal}
