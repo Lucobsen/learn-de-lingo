@@ -22,14 +22,13 @@ const StyledForm = styled("form")`
 type AddItemModalProps = { addItem: (word: Word) => void };
 
 export const AddItemModal = ({ addItem }: AddItemModalProps) => {
-  const form = useForm<Word>({
+  const form = useForm<Pick<Word, "newWord" | "knownWord">>({
     defaultValues: {
       newWord: "",
       knownWord: "",
     },
     onSubmit: ({ value }) => {
-      console.log(value);
-      addItem(value);
+      addItem({ ...value, score: 0, id: crypto.randomUUID() });
     },
   });
 

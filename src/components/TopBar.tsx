@@ -22,8 +22,18 @@ export const TopBar = () => {
 
   return (
     <>
-      <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="fixed" sx={{ zIndex: 1000 }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+        }}
+      >
+        <AppBar
+          position="fixed"
+          sx={{
+            zIndex: 1000,
+            borderBottom: ({ palette }) => `1px solid ${palette.primary.main}`,
+          }}
+        >
           <Toolbar>
             <SvgIcon fontSize="large" component={AutoStoriesIcon} />
             <Typography variant="h6" sx={{ flexGrow: 1 }} pl={2}>
