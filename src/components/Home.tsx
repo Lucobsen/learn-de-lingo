@@ -5,7 +5,6 @@ import {
   Container,
   Divider,
   IconButton,
-  Paper,
   Stack,
   Table,
   TableBody,
@@ -25,8 +24,25 @@ import {
 } from "@tanstack/react-table";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { TestItem } from "./TestItem";
-
+import data from "./../data.json";
 export type Word = { newWord: string; knownWord: string };
+
+const getRandom = (words: Word[], count = 5) => {
+  const result = new Array(count);
+  let length = words.length;
+  const taken = new Array(length);
+
+  if (count > length)
+    throw new RangeError("getRandom: more elements taken than available");
+
+  while (count--) {
+    const x = Math.floor(Math.random() * length);
+    result[count] = words[x in taken ? taken[x] : x];
+    taken[x] = --length in taken ? taken[length] : length;
+  }
+
+  return result;
+};
 
 const columnHelper = createColumnHelper<Word>();
 
@@ -42,7 +58,8 @@ const columns = [
 ];
 
 export const Home = () => {
-  const [words] = useLocalStorage<Word[]>("words", []);
+  const [words] = useLocalStorage<Word[]>("words", data);
+  const [testWords, setTestWords] = useState<Word[]>([]);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
 
@@ -58,7 +75,8 @@ export const Home = () => {
     <Container
       sx={{
         display: "flex",
-        marginTop: 4,
+        mt: 10,
+        mb: 4,
         justifyContent: "center",
         p: 0,
       }}
@@ -72,7 +90,7 @@ export const Home = () => {
             border: ({ palette }) => `1px solid ${palette.primary.main}`,
           }}
         >
-          {words.map(({ knownWord, newWord }, index) => (
+          {testWords.map(({ knownWord, newWord }, index) => (
             <TestItem key={index} knownWord={knownWord} newWord={newWord} />
           ))}
           <Button
@@ -111,7 +129,10 @@ export const Home = () => {
             <Button
               size="small"
               variant="outlined"
-              onClick={() => setIsTesting(true)}
+              onClick={() => {
+                setTestWords(getRandom(words));
+                setIsTesting(true);
+              }}
             >
               Test
             </Button>
@@ -119,7 +140,7 @@ export const Home = () => {
 
           <Collapse in={isCollapsed}>
             <Divider />
-            <TableContainer component={Paper}>
+            <TableContainer sx={{ maxHeight: 300 }}>
               <Table>
                 <TableBody>
                   {table.getRowModel().rows.map((row) => (

@@ -23,7 +23,7 @@ export const TopBar = () => {
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
+        <AppBar position="fixed" sx={{ zIndex: 1000 }}>
           <Toolbar>
             <SvgIcon fontSize="large" component={AutoStoriesIcon} />
             <Typography variant="h6" sx={{ flexGrow: 1 }} pl={2}>
