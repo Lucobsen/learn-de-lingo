@@ -1,10 +1,12 @@
 import {
+  Box,
   Button,
   Card,
   Collapse,
   Container,
   Divider,
   IconButton,
+  LinearProgress,
   Stack,
   Table,
   TableBody,
@@ -24,16 +26,20 @@ import {
 } from "@tanstack/react-table";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { TestItem } from "./TestItem";
-import data from "./../data.json";
-export type Word = { newWord: string; knownWord: string };
+
+export type Word = {
+  id: string;
+  newWord: string;
+  knownWord: string;
+  score?: number;
+};
 
 const getRandom = (words: Word[], count = 5) => {
   const result = new Array(count);
   let length = words.length;
   const taken = new Array(length);
 
-  if (count > length)
-    throw new RangeError("getRandom: more elements taken than available");
+  if (count > length) count = length;
 
   while (count--) {
     const x = Math.floor(Math.random() * length);
@@ -46,6 +52,13 @@ const getRandom = (words: Word[], count = 5) => {
 
 const columnHelper = createColumnHelper<Word>();
 
+const getBarColor = (progress: number = 0) => {
+  if (progress === 0) return "info";
+  if (progress < 25) return "error";
+  if (progress >= 25 && progress < 75) return "warning";
+  if (progress >= 75) return "success";
+};
+
 const columns = [
   columnHelper.accessor((row) => row.newWord, {
     id: "newWord",
@@ -53,12 +66,28 @@ const columns = [
   }),
   columnHelper.accessor((row) => row.knownWord, {
     id: "knownWord",
-    cell: (info) => <i>{info.getValue()}</i>,
+    cell: (info) => (
+      <Box textAlign="center">
+        <i>{info.getValue()}</i>
+      </Box>
+    ),
+  }),
+  columnHelper.accessor((row) => row.score, {
+    id: "score",
+    cell: (info) => (
+      <Box sx={{ minWidth: 100 }}>
+        <LinearProgress
+          variant="determinate"
+          color={getBarColor(info.getValue())}
+          value={info.getValue()}
+        />
+      </Box>
+    ),
   }),
 ];
 
 export const Home = () => {
-  const [words] = useLocalStorage<Word[]>("words", data);
+  const [words, setWords] = useLocalStorage<Word[]>("words", []);
   const [testWords, setTestWords] = useState<Word[]>([]);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
@@ -70,6 +99,26 @@ export const Home = () => {
   });
 
   if (words.length === 0) return null;
+
+  const updateWord = (
+    updatedWordId: string,
+    score: number = 0,
+    value: boolean
+  ) => {
+    const index = words.findIndex(({ id }) => id === updatedWordId);
+
+    if (index >= 0) {
+      if (value === true) {
+        const result = score + 25;
+        words[index].score = result > 100 ? 100 : result;
+      } else if (value === false) {
+        const result = score - 25;
+        words[index].score = result < 0 ? 0 : result;
+      }
+
+      setWords(words);
+    }
+  };
 
   return (
     <Container
@@ -90,8 +139,13 @@ export const Home = () => {
             border: ({ palette }) => `1px solid ${palette.primary.main}`,
           }}
         >
-          {testWords.map(({ knownWord, newWord }, index) => (
-            <TestItem key={index} knownWord={knownWord} newWord={newWord} />
+          {testWords.map(({ knownWord, newWord, id, score }) => (
+            <TestItem
+              key={id}
+              knownWord={knownWord}
+              newWord={newWord}
+              updateScore={(value) => updateWord(id, score, value)}
+            />
           ))}
           <Button
             color="error"
