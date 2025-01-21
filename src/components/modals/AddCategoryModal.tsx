@@ -1,6 +1,6 @@
 import { Button, styled, TextField } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
-import { Word } from "./Home";
+import { Word } from "../Home";
 
 const StyledBox = styled("div")`
   justify-content: center;
@@ -19,16 +19,15 @@ const StyledForm = styled("form")`
   flex-direction: column;
 `;
 
-type AddItemModalProps = { addItem: (word: Word) => void };
+export type Category = { id: string; title: string; words: Word[] };
 
-export const AddItemModal = ({ addItem }: AddItemModalProps) => {
-  const form = useForm<Pick<Word, "newWord" | "knownWord">>({
-    defaultValues: {
-      newWord: "",
-      knownWord: "",
-    },
+type AddCategoryModalProps = { addCategory: (category: Category) => void };
+
+export const AddCategoryModal = ({ addCategory }: AddCategoryModalProps) => {
+  const form = useForm<{ title: string }>({
+    defaultValues: { title: "" },
     onSubmit: ({ value }) => {
-      addItem({ ...value, score: 0, id: crypto.randomUUID() });
+      addCategory({ title: value.title, id: crypto.randomUUID(), words: [] });
     },
   });
 
@@ -43,35 +42,15 @@ export const AddItemModal = ({ addItem }: AddItemModalProps) => {
       >
         <div>
           <form.Field
-            name="newWord"
+            name="title"
             children={(field) => (
               <TextField
                 id={field.name}
                 fullWidth
                 name={field.name}
-                label="New Word"
+                label="New Category"
                 value={field.state.value}
-                onChange={({ target }) =>
-                  field.handleChange(target.value.toUpperCase())
-                }
-              />
-            )}
-          />
-        </div>
-
-        <div style={{ paddingTop: 16 }}>
-          <form.Field
-            name="knownWord"
-            children={(field) => (
-              <TextField
-                fullWidth
-                id={field.name}
-                name={field.name}
-                label="Known Word"
-                value={field.state.value}
-                onChange={({ target }) =>
-                  field.handleChange(target.value.toUpperCase())
-                }
+                onChange={({ target }) => field.handleChange(target.value)}
               />
             )}
           />

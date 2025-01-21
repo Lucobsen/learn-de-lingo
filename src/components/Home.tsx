@@ -1,8 +1,9 @@
-import { Container } from "@mui/material";
+import { Container, Stack } from "@mui/material";
 import { useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import { TestCard } from "./TestCard";
 import { WordCard } from "./WordCard";
+import { Category } from "./modals/AddCategoryModal";
 
 export type Word = {
   id: string;
@@ -28,11 +29,12 @@ const getRandom = (words: Word[], count = 5) => {
 };
 
 export const Home = () => {
-  const [words] = useLocalStorage<Word[]>("words", []);
+  const [categories] = useLocalStorage<Record<string, Category>>(
+    "categories",
+    {}
+  );
   const [testWords, setTestWords] = useState<Word[]>([]);
   const [isTesting, setIsTesting] = useState(false);
-
-  if (words.length === 0) return null;
 
   return (
     <Container
@@ -50,10 +52,22 @@ export const Home = () => {
           updateIsTestingState={() => setIsTesting(false)}
         />
       ) : (
-        <WordCard
-          updateTestWords={() => setTestWords(getRandom(words))}
-          updateIsTestingState={() => setIsTesting(true)}
-        />
+        <Stack
+          gap={2}
+          sx={{
+            width: "90%",
+          }}
+        >
+          {Object.entries(categories).map(([key, { title, words }]) => (
+            <WordCard
+              key={key}
+              title={title}
+              words={words}
+              updateTestWords={() => setTestWords(getRandom(words))}
+              updateIsTestingState={() => setIsTesting(true)}
+            />
+          ))}
+        </Stack>
       )}
     </Container>
   );
