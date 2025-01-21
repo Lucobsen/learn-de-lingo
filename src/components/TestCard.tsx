@@ -2,35 +2,44 @@ import { Button, Card } from "@mui/material";
 import { useLocalStorage } from "usehooks-ts";
 import { TestItem } from "./TestItem";
 import { Word } from "./Home";
+import { Category } from "./modals/AddCategoryModal";
 
 type TestCardProps = {
+  testingId: string;
   testWords: Word[];
   updateIsTestingState: () => void;
 };
 
 export const TestCard = ({
+  testingId,
   testWords,
   updateIsTestingState,
 }: TestCardProps) => {
-  const [words, setWords] = useLocalStorage<Word[]>("words", []);
+  const [categories, setCategories] = useLocalStorage<Record<string, Category>>(
+    "categories",
+    {}
+  );
 
   const updateWord = (
-    updatedWordId: string,
+    updatedWord: string,
     score: number = 0,
     value: boolean
   ) => {
-    const index = words.findIndex(({ id }) => id === updatedWordId);
+    const updatedCategory = categories[testingId];
+    const index = updatedCategory.words.findIndex(
+      ({ newWord }) => newWord === updatedWord
+    );
 
     if (index >= 0) {
       if (value === true) {
         const result = score + 25;
-        words[index].score = result > 100 ? 100 : result;
+        updatedCategory.words[index].score = result > 100 ? 100 : result;
       } else if (value === false) {
         const result = score - 25;
-        words[index].score = result < 0 ? 0 : result;
+        updatedCategory.words[index].score = result < 0 ? 0 : result;
       }
 
-      setWords(words);
+      setCategories({ ...categories, [testingId]: updatedCategory });
     }
   };
 
@@ -43,12 +52,12 @@ export const TestCard = ({
         border: ({ palette }) => `1px solid ${palette.primary.main}`,
       }}
     >
-      {testWords.map(({ knownWord, newWord, id, score }) => (
+      {testWords.map(({ knownWord, newWord, score }, index) => (
         <TestItem
-          key={id}
+          key={index}
           knownWord={knownWord}
           newWord={newWord}
-          updateScore={(value) => updateWord(id, score, value)}
+          updateScore={(value) => updateWord(newWord, score, value)}
         />
       ))}
       <Button

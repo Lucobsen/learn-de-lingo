@@ -67,7 +67,6 @@ type WordCardProps = {
   title: string;
   words: Word[];
   openAddWordModal: () => void;
-  updateTestWords: () => void;
   updateIsTestingState: () => void;
 };
 
@@ -75,7 +74,6 @@ export const WordCard = ({
   title,
   words,
   openAddWordModal,
-  updateTestWords,
   updateIsTestingState,
 }: WordCardProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -129,10 +127,7 @@ export const WordCard = ({
             <Button
               variant="text"
               size="small"
-              onClick={() => {
-                updateTestWords();
-                updateIsTestingState();
-              }}
+              onClick={() => updateIsTestingState()}
             >
               Test "{title}"
             </Button>
