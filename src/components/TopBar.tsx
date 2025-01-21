@@ -8,14 +8,16 @@ import {
   Typography,
 } from "@mui/material";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
-import { AddItemModal } from "./AddItemModal";
 import { useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
-import { Word } from "./Home";
 import AddIcon from "@mui/icons-material/Add";
+import { AddCategoryModal, Category } from "./modals/AddCategoryModal";
 
 export const TopBar = () => {
-  const [, setWords] = useLocalStorage<Word[]>("words", []);
+  const [categories, setCategories] = useLocalStorage<Record<string, Category>>(
+    "categories",
+    {}
+  );
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -41,6 +43,7 @@ export const TopBar = () => {
             </Typography>
 
             <Fab
+              size="small"
               sx={{
                 width: 30,
                 height: 30,
@@ -62,14 +65,12 @@ export const TopBar = () => {
       </Box>
 
       <Modal open={open} onClose={handleClose}>
-        <div>
-          <AddItemModal
-            addItem={(value) => {
-              setWords((previousValue) => [...previousValue, value]);
-              handleClose();
-            }}
-          />
-        </div>
+        <AddCategoryModal
+          addCategory={(value) => {
+            setCategories({ ...categories, [value.id]: value });
+            handleClose();
+          }}
+        />
       </Modal>
     </>
   );

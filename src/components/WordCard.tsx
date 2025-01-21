@@ -6,6 +6,7 @@ import {
   Divider,
   IconButton,
   LinearProgress,
+  Popover,
   Stack,
   Table,
   TableBody,
@@ -16,7 +17,6 @@ import {
 } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useState } from "react";
-import { useLocalStorage } from "usehooks-ts";
 import {
   createColumnHelper,
   flexRender,
@@ -25,6 +25,7 @@ import {
 } from "@tanstack/react-table";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Word } from "./Home";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 
 const columnHelper = createColumnHelper<Word>();
 
@@ -63,15 +64,21 @@ const columns = [
 ];
 
 type WordCardProps = {
+  title: string;
+  words: Word[];
+  openAddWordModal: () => void;
   updateTestWords: () => void;
   updateIsTestingState: () => void;
 };
 
 export const WordCard = ({
+  title,
+  words,
+  openAddWordModal,
   updateTestWords,
   updateIsTestingState,
 }: WordCardProps) => {
-  const [words] = useLocalStorage<Word[]>("words", []);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const table = useReactTable({
@@ -84,7 +91,6 @@ export const WordCard = ({
     <Card
       sx={{
         p: 1,
-        width: "90%",
         borderRadius: 1,
         border: ({ palette }) => `1px solid ${palette.primary.main}`,
       }}
@@ -96,45 +102,72 @@ export const WordCard = ({
           >
             {isCollapsed ? <ExpandMoreIcon /> : <ChevronRightIcon />}
           </IconButton>
-          <Typography>Vocab</Typography>
+          <Typography>{title}</Typography>
         </Stack>
 
-        <Button
+        <IconButton
           size="small"
-          variant="outlined"
-          onClick={() => {
-            updateTestWords();
-            updateIsTestingState();
+          onClick={({ currentTarget }) => setAnchorEl(currentTarget)}
+        >
+          <MoreHorizIcon />
+        </IconButton>
+
+        <Popover
+          id="category-popover"
+          open={Boolean(anchorEl)}
+          anchorEl={anchorEl}
+          onClose={() => setAnchorEl(null)}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "left",
           }}
         >
-          Test
-        </Button>
+          <Stack p={1} gap={1}>
+            <Button variant="text" size="small" onClick={openAddWordModal}>
+              Add New Word
+            </Button>
+            <Button
+              variant="text"
+              size="small"
+              onClick={() => {
+                updateTestWords();
+                updateIsTestingState();
+              }}
+            >
+              Test "{title}"
+            </Button>
+          </Stack>
+        </Popover>
       </Stack>
 
       <Collapse in={isCollapsed}>
         <Divider />
-        <TableContainer sx={{ maxHeight: 300 }}>
-          <Table>
-            <TableBody>
-              {table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      padding="none"
-                      sx={{ py: 1, border: "none" }}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        {words.length === 0 ? (
+          <Typography mt={1}>No words</Typography>
+        ) : (
+          <TableContainer sx={{ maxHeight: 300 }}>
+            <Table>
+              <TableBody>
+                {table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        padding="none"
+                        sx={{ py: 1, border: "none" }}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </Collapse>
     </Card>
   );
