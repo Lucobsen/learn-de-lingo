@@ -6,6 +6,7 @@ import {
   Divider,
   IconButton,
   LinearProgress,
+  Popover,
   Stack,
   Table,
   TableBody,
@@ -24,6 +25,7 @@ import {
 } from "@tanstack/react-table";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Word } from "./Home";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 
 const columnHelper = createColumnHelper<Word>();
 
@@ -64,6 +66,7 @@ const columns = [
 type WordCardProps = {
   title: string;
   words: Word[];
+  openAddWordModal: () => void;
   updateTestWords: () => void;
   updateIsTestingState: () => void;
 };
@@ -71,9 +74,11 @@ type WordCardProps = {
 export const WordCard = ({
   title,
   words,
+  openAddWordModal,
   updateTestWords,
   updateIsTestingState,
 }: WordCardProps) => {
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const table = useReactTable({
@@ -100,16 +105,39 @@ export const WordCard = ({
           <Typography>{title}</Typography>
         </Stack>
 
-        <Button
+        <IconButton
           size="small"
-          variant="outlined"
-          onClick={() => {
-            updateTestWords();
-            updateIsTestingState();
+          onClick={({ currentTarget }) => setAnchorEl(currentTarget)}
+        >
+          <MoreHorizIcon />
+        </IconButton>
+
+        <Popover
+          id="category-popover"
+          open={Boolean(anchorEl)}
+          anchorEl={anchorEl}
+          onClose={() => setAnchorEl(null)}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "left",
           }}
         >
-          Test
-        </Button>
+          <Stack p={1} gap={1}>
+            <Button variant="text" size="small" onClick={openAddWordModal}>
+              Add New Word
+            </Button>
+            <Button
+              variant="text"
+              size="small"
+              onClick={() => {
+                updateTestWords();
+                updateIsTestingState();
+              }}
+            >
+              Test "{title}"
+            </Button>
+          </Stack>
+        </Popover>
       </Stack>
 
       <Collapse in={isCollapsed}>
