@@ -28,7 +28,7 @@ export const AddItemModal = ({ addItem }: AddItemModalProps) => {
       knownWord: "",
     },
     onSubmit: ({ value }) => {
-      addItem({ ...value, score: 0, id: crypto.randomUUID() });
+      addItem({ ...value, score: 0 });
     },
   });
 

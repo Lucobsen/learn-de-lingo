@@ -7,7 +7,6 @@ import { Category } from "./modals/AddCategoryModal";
 import { AddItemModal } from "./modals/AddItemModal";
 
 export type Word = {
-  id: string;
   newWord: string;
   knownWord: string;
   score?: number;
@@ -37,7 +36,7 @@ export const Home = () => {
 
   const [focusedId, setFocusedId] = useState("");
   const [testWords, setTestWords] = useState<Word[]>([]);
-  const [isTesting, setIsTesting] = useState(false);
+  const [testingId, setTestingId] = useState("");
 
   return (
     <>
@@ -50,10 +49,11 @@ export const Home = () => {
           p: 0,
         }}
       >
-        {isTesting ? (
+        {Boolean(testingId) ? (
           <TestCard
+            testingId={testingId}
             testWords={testWords}
-            updateIsTestingState={() => setIsTesting(false)}
+            updateIsTestingState={() => setTestingId("")}
           />
         ) : (
           <Stack
@@ -68,8 +68,10 @@ export const Home = () => {
                 title={title}
                 words={words}
                 openAddWordModal={() => setFocusedId(key)}
-                updateTestWords={() => setTestWords(getRandom(words))}
-                updateIsTestingState={() => setIsTesting(true)}
+                updateIsTestingState={() => {
+                  setTestWords(getRandom(words));
+                  setTestingId(key);
+                }}
               />
             ))}
           </Stack>
