@@ -1,12 +1,12 @@
-import { Container, Modal, Stack } from "@mui/material";
+import { Container, Stack } from "@mui/material";
 import { useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import { TestCard } from "./TestCard";
 import { WordCard } from "./WordCard";
 import { Category } from "./modals/AddCategoryModal";
-import { AddItemModal } from "./modals/AddItemModal";
 
 export type Word = {
+  id: string;
   newWord: string;
   knownWord: string;
   score?: number;
@@ -29,12 +29,11 @@ const getRandom = (words: Word[], count = 5) => {
 };
 
 export const Home = () => {
-  const [categories, setCategories] = useLocalStorage<Record<string, Category>>(
+  const [categories] = useLocalStorage<Record<string, Category>>(
     "categories",
     {}
   );
 
-  const [focusedId, setFocusedId] = useState("");
   const [testWords, setTestWords] = useState<Word[]>([]);
   const [testingId, setTestingId] = useState("");
 
@@ -62,12 +61,12 @@ export const Home = () => {
               width: "90%",
             }}
           >
-            {Object.entries(categories).map(([key, { title, words }]) => (
+            {Object.entries(categories).map(([key, { id, title, words }]) => (
               <WordCard
                 key={key}
+                id={id}
                 title={title}
                 words={words}
-                openAddWordModal={() => setFocusedId(key)}
                 updateIsTestingState={() => {
                   setTestWords(getRandom(words));
                   setTestingId(key);
@@ -77,17 +76,6 @@ export const Home = () => {
           </Stack>
         )}
       </Container>
-
-      <Modal open={Boolean(focusedId)} onClose={() => setFocusedId("")}>
-        <AddItemModal
-          addItem={(value) => {
-            const updatedItem = categories[focusedId];
-            updatedItem.words = [...updatedItem.words, value];
-            setCategories({ ...categories, [focusedId]: updatedItem });
-            setFocusedId("");
-          }}
-        />
-      </Modal>
     </>
   );
 };

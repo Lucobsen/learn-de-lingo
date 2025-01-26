@@ -1,9 +1,10 @@
 import { Button, styled, TextField } from "@mui/material";
-import { useForm } from "@tanstack/react-form";
 import { Word } from "../Home";
+import { useState } from "react";
 
 const StyledBox = styled("div")`
-  justify-content: center;
+  display: flex;
+  flex-direction: column;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -14,62 +15,37 @@ const StyledBox = styled("div")`
   background-color: ${({ theme }) => theme.palette.background.paper};
 `;
 
-const StyledForm = styled("form")`
-  display: flex;
-  flex-direction: column;
-`;
-
 export type Category = { id: string; title: string; words: Word[] };
 
 type AddCategoryModalProps = { addCategory: (category: Category) => void };
 
 export const AddCategoryModal = ({ addCategory }: AddCategoryModalProps) => {
-  const form = useForm<{ title: string }>({
-    defaultValues: { title: "" },
-    onSubmit: ({ value }) => {
-      addCategory({ title: value.title, id: crypto.randomUUID(), words: [] });
-    },
-  });
+  const [categoryTitle, setCategoryTitle] = useState("");
 
   return (
     <StyledBox>
-      <StyledForm
-        onSubmit={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          form.handleSubmit();
-        }}
-      >
-        <div>
-          <form.Field
-            name="title"
-            children={(field) => (
-              <TextField
-                id={field.name}
-                fullWidth
-                name={field.name}
-                label="New Category"
-                value={field.state.value}
-                onChange={({ target }) => field.handleChange(target.value)}
-              />
-            )}
-          />
-        </div>
+      <TextField
+        fullWidth
+        placeholder="New Category Title"
+        name="categoryTitle"
+        value={categoryTitle}
+        onChange={({ target }) => setCategoryTitle(target.value)}
+      />
 
-        <form.Subscribe
-          selector={(state) => [state.canSubmit, state.isSubmitting]}
-          children={([canSubmit, isSubmitting]) => (
-            <Button
-              disabled={!canSubmit}
-              type="submit"
-              variant="contained"
-              sx={{ mt: 2 }}
-            >
-              {isSubmitting ? "..." : "Submit"}
-            </Button>
-          )}
-        />
-      </StyledForm>
+      <Button
+        onClick={() =>
+          addCategory({
+            id: crypto.randomUUID(),
+            title: categoryTitle,
+            words: [],
+          })
+        }
+        disabled={!categoryTitle}
+        variant="contained"
+        sx={{ mt: 2 }}
+      >
+        Add
+      </Button>
     </StyledBox>
   );
 };

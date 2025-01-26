@@ -6,7 +6,6 @@ import {
   Divider,
   IconButton,
   LinearProgress,
-  Popover,
   Stack,
   Table,
   TableBody,
@@ -25,7 +24,10 @@ import {
 } from "@tanstack/react-table";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Word } from "./Home";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import { NewItemRow } from "./NewItemRow";
+import { useLocalStorage } from "usehooks-ts";
+import { Category } from "./modals/AddCategoryModal";
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 
 const columnHelper = createColumnHelper<Word>();
 
@@ -43,11 +45,7 @@ const columns = [
   }),
   columnHelper.accessor((row) => row.knownWord, {
     id: "knownWord",
-    cell: (info) => (
-      <Box textAlign="center">
-        <i>{info.getValue()}</i>
-      </Box>
-    ),
+    cell: (info) => <i>{info.getValue()}</i>,
   }),
   columnHelper.accessor((row) => row.score, {
     id: "score",
@@ -64,19 +62,22 @@ const columns = [
 ];
 
 type WordCardProps = {
+  id: string;
   title: string;
   words: Word[];
-  openAddWordModal: () => void;
   updateIsTestingState: () => void;
 };
 
 export const WordCard = ({
+  id,
   title,
   words,
-  openAddWordModal,
   updateIsTestingState,
 }: WordCardProps) => {
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [categories, setCategories] = useLocalStorage<Record<string, Category>>(
+    "categories",
+    {}
+  );
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const table = useReactTable({
@@ -84,6 +85,16 @@ export const WordCard = ({
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  const handleDeleteWord = (wordId: string) => {
+    const updatedItem = categories[id];
+    const updatedWords = updatedItem.words.filter((word) => word.id !== wordId);
+
+    setCategories({
+      ...categories,
+      [id]: { ...updatedItem, words: updatedWords },
+    });
+  };
 
   return (
     <Card
@@ -103,66 +114,58 @@ export const WordCard = ({
           <Typography>{title}</Typography>
         </Stack>
 
-        <IconButton
+        <Button
+          variant="contained"
+          disabled={words.length === 0}
           size="small"
-          onClick={({ currentTarget }) => setAnchorEl(currentTarget)}
+          onClick={updateIsTestingState}
         >
-          <MoreHorizIcon />
-        </IconButton>
-
-        <Popover
-          id="category-popover"
-          open={Boolean(anchorEl)}
-          anchorEl={anchorEl}
-          onClose={() => setAnchorEl(null)}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "left",
-          }}
-        >
-          <Stack p={1} gap={1}>
-            <Button variant="text" size="small" onClick={openAddWordModal}>
-              Add New Word
-            </Button>
-            <Button
-              variant="text"
-              size="small"
-              onClick={() => updateIsTestingState()}
-            >
-              Test "{title}"
-            </Button>
-          </Stack>
-        </Popover>
+          Test
+        </Button>
       </Stack>
 
       <Collapse in={isCollapsed}>
         <Divider />
-        {words.length === 0 ? (
-          <Typography mt={1}>No words</Typography>
-        ) : (
-          <TableContainer sx={{ maxHeight: 300 }}>
-            <Table>
-              <TableBody>
-                {table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        padding="none"
-                        sx={{ py: 1, border: "none" }}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
+
+        <TableContainer sx={{ maxHeight: 300 }}>
+          <Table>
+            <TableBody>
+              {table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      padding="none"
+                      sx={{ py: 1, border: "none" }}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                  <TableCell padding="none" sx={{ py: 1, border: "none" }}>
+                    <IconButton
+                      sx={{ pr: 0 }}
+                      color="error"
+                      size="small"
+                      onClick={() => handleDeleteWord(row.original.id)}
+                    >
+                      <RemoveCircleOutlineIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+              <NewItemRow
+                addItem={(value) => {
+                  const updatedItem = categories[id];
+                  updatedItem.words = [...updatedItem.words, value];
+                  setCategories({ ...categories, [id]: updatedItem });
+                }}
+              />
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Collapse>
     </Card>
   );
